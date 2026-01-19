@@ -1,0 +1,10 @@
+build/
+*.o
+*.a
+*.out
+*.vxe
+
+
+.project
+.wrproject
+.settings/
