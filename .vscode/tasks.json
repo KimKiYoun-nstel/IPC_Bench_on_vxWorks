@@ -1,0 +1,128 @@
+{
+  "version": "2.0.0",
+  "presentation": {
+    "reveal": "always",
+    "panel": "dedicated",
+    "clear": true,
+    "showReuseMessage": false
+  },
+  "tasks": [
+    {
+      "label": "Vx Make: Build All (release)",
+      "type": "process",
+      "command": "D:\\WindRiver\\wrenv.exe",
+      "args": [
+        "cmd.exe",
+        "/d",
+        "/s",
+        "/c",
+        "call scripts\\vx_set_env.cmd && make all"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+    {
+      "label": "Vx Make: Build DKM (release)",
+      "type": "process",
+      "command": "D:\\WindRiver\\wrenv.exe",
+      "args": [
+        "cmd.exe",
+        "/d",
+        "/s",
+        "/c",
+        "call scripts\\vx_set_env.cmd && make dkm"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Vx Make: Build RTP (release)",
+      "type": "process",
+      "command": "D:\\WindRiver\\wrenv.exe",
+      "args": [
+        "cmd.exe",
+        "/d",
+        "/s",
+        "/c",
+        "call scripts\\vx_set_env.cmd && make rtp"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Vx Make: Build All (debug)",
+      "type": "process",
+      "command": "D:\\WindRiver\\wrenv.exe",
+      "args": [
+        "cmd.exe",
+        "/d",
+        "/s",
+        "/c",
+        "call scripts\\vx_set_env.cmd && make MODE=debug all"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [],
+      "group": "build"
+    },
+    {
+      "label": "Vx Make: Build DKM (debug)",
+      "type": "process",
+      "command": "D:\\WindRiver\\wrenv.exe",
+      "args": [
+        "cmd.exe",
+        "/d",
+        "/s",
+        "/c",
+        "call scripts\\vx_set_env.cmd && make MODE=debug dkm"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Vx Make: Build RTP (debug)",
+      "type": "process",
+      "command": "D:\\WindRiver\\wrenv.exe",
+      "args": [
+        "cmd.exe",
+        "/d",
+        "/s",
+        "/c",
+        "call scripts\\vx_set_env.cmd && make MODE=debug rtp"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Vx Make: Clean All",
+      "type": "process",
+      "command": "D:\\WindRiver\\wrenv.exe",
+      "args": [
+        "cmd.exe",
+        "/d",
+        "/s",
+        "/c",
+        "call scripts\\vx_set_env.cmd && make clean"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    }
+  ]
+}

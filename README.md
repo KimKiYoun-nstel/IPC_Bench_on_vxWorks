@@ -10,6 +10,8 @@
 - `workbench/` : Workbench Makefile Project 추가 가이드
 
 ## 빌드
+- VxWorks env: set `VSB_DIR` (or `WIND_CC_SYSROOT`) and `WIND_BASE` (see `BuildRef/forDKM/vx_set_env.cmd`)
+- `make all` (or `make dkm`, `make rtp`), use `make MODE=debug` for debug builds
 - 루트에서 `make all` 또는 Workbench에서 Build Target `all/dkm/rtp` 실행
 - 툴체인/링크 플래그는 `config.mk`에서 환경에 맞게 조정
 

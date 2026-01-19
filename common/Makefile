@@ -6,7 +6,8 @@ OBJDIR := build
 SRCS := $(wildcard src/*.c)
 OBJS := $(patsubst src/%.c,$(OBJDIR)/%.o,$(SRCS))
 
-CFLAGS := $(CFLAGS_COMMON) $(INC_COMMON) -I$(ROOT_DIR)/common/include
+CPPFLAGS := $(INC_COMMON)
+CFLAGS := $(CFLAGS_COMMON)
 
 .PHONY: all clean
 
@@ -16,7 +17,7 @@ $(LIB): $(OBJS)
 	$(AR_COMMON) rcs $@ $^
 
 $(OBJDIR)/%.o: src/%.c | $(OBJDIR)
-	$(CC_COMMON) $(CFLAGS) -c $< -o $@
+	$(CC_COMMON) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
 
 $(OBJDIR):
 	mkdir -p $(OBJDIR)

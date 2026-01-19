@@ -8,3 +8,7 @@ build/
 .project
 .wrproject
 .settings/
+.cproject
+
+
+BuildRef
