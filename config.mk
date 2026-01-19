@@ -35,6 +35,9 @@ VX_INCLUDE_DIRS ?= \
 	$(VX_SYSROOT)/usr/h/public \
 	$(VX_SYSROOT)/usr/h \
 	$(VX_SYSROOT)/share/h/public \
+	$(WIND_BASE_POSIX)/source/os/core/user/h \
+	$(WIND_BASE_POSIX)/source/os/core/user/h/types \
+	$(VX_SYSROOT)/krnl/h/public \
 	$(VX_SYSROOT)/krnl/h/public/base \
 	$(WIND_BASE_POSIX)/target/h
 VX_CPPFLAGS ?= -D_VSB_CONFIG_FILE=\"$(VX_SYSROOT)/h/config/vsbConfig.h\"
