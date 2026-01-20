@@ -47,3 +47,17 @@ int benchClientRun(const char* transport, const char* dst_or_name, int port, con
 
     return bench_run_client(&ep, &run, &rep);
 }
+
+/* Convenience wrappers: RR server does not need rate/payload */
+int benchServerStartRR(const char* transport, const char* bind_or_name, int port, const char* name,
+                       int duration_sec)
+{
+    return benchServerStart(transport, bind_or_name, port, name, BENCH_MODE_RR, 0, duration_sec, 0);
+}
+
+int benchServerStartOneWay(const char* transport, const char* bind_or_name, int port, const char* name,
+                           int rate_hz, int duration_sec, int payload_len)
+{
+    return benchServerStart(transport, bind_or_name, port, name, BENCH_MODE_ONEWAY,
+                            rate_hz, duration_sec, payload_len);
+}

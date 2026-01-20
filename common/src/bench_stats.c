@@ -14,6 +14,7 @@ void bench_stats_init(bench_stats_t* s, uint64_t* buf, size_t cap)
     s->capacity = cap;
     s->count = 0;
     s->sent = s->received = s->loss = s->out_of_order = 0;
+    s->tx_fail = 0;
 }
 
 void bench_stats_add_sample(bench_stats_t* s, uint64_t ns)

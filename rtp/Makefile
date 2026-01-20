@@ -9,7 +9,7 @@ OBJS := $(patsubst src/%.c,$(OBJDIR)/%.o,$(SRCS))
 CPPFLAGS := $(INC_COMMON) -Iinclude
 CFLAGS := $(CFLAGS_RTP)
 LDFLAGS := $(LDFLAGS_RTP)
-LIBS := $(ROOT_DIR)/common/libbenchcommon.a
+LIBS := $(ROOT_DIR)/common/libbenchcommon_rtp.a
 
 .PHONY: all clean
 

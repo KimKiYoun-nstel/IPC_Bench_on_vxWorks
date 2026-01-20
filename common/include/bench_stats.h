@@ -14,6 +14,7 @@ typedef struct {
     uint32_t received;
     uint32_t loss;
     uint32_t out_of_order;
+    uint32_t tx_fail;
 } bench_stats_t;
 
 void bench_stats_init(bench_stats_t* s, uint64_t* buf, size_t cap);

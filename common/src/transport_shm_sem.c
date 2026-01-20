@@ -5,9 +5,20 @@
 #include <string.h>
 #include <stdio.h>
 #include <errno.h>
+
+#ifdef _WRS_KERNEL
+#include <errnoLib.h>
+#define BENCH_ERRNO() errnoGet()
+#else
+#define BENCH_ERRNO() errno
+#endif
 #include <time.h>
 
 #include <fcntl.h>
+#ifdef _WRS_KERNEL
+#include <base/b_off_t.h>
+#include <vmLib.h>
+#endif
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <semaphore.h>
@@ -57,26 +68,65 @@ static void build_names(const bench_endpoint_cfg_t* cfg, char* c2s, size_t c2s_l
     snprintf(s2c_sem, s2c_sem_len, "%s_s2c_sem", base);
 }
 
+static size_t bench_page_size(void)
+{
+#ifdef _WRS_KERNEL
+    size_t ps = (size_t)vmPageSizeGet();
+    return ps ? ps : 4096;
+#else
+    long ps = sysconf(_SC_PAGESIZE);
+    return (ps > 0) ? (size_t)ps : 4096;
+#endif
+}
+
 static size_t ring_total_size(void)
 {
-    return sizeof(shmsem_ring_t) - 1 + (size_t)SHMSEM_RING_CAP * (size_t)SHMSEM_ENTRY_SIZE;
+    size_t raw = sizeof(shmsem_ring_t) - 1 + (size_t)SHMSEM_RING_CAP * (size_t)SHMSEM_ENTRY_SIZE;
+    size_t ps = bench_page_size();
+    return (raw + ps - 1) & ~(ps - 1);
 }
 
 static shmsem_ring_t* map_ring(const char* name, int create, size_t* out_size)
 {
     int flags = O_RDWR | (create ? O_CREAT : 0);
     int fd = shm_open(name, flags, 0666);
-    if (fd < 0) return NULL;
+    int created = create;
+    if (fd < 0 && !create && BENCH_ERRNO() == ENOENT) {
+        fd = shm_open(name, O_RDWR | O_CREAT, 0666);
+        if (fd >= 0) created = 1;
+    }
+    if (fd < 0) {
+        printf("[BENCH][SHM] shm_open failed name=%s errno=%d\n", name, BENCH_ERRNO());
+        return NULL;
+    }
     size_t sz = ring_total_size();
-    if (create) {
+    if (created) {
         if (ftruncate(fd, (off_t)sz) != 0) {
             close(fd);
+            printf("[BENCH][SHM] ftruncate failed name=%s errno=%d\n", name, BENCH_ERRNO());
             return NULL;
+        }
+    } else {
+        struct stat st;
+        if (fstat(fd, &st) != 0) {
+            close(fd);
+            printf("[BENCH][SHM] fstat failed name=%s errno=%d\n", name, BENCH_ERRNO());
+            return NULL;
+        }
+        if ((size_t)st.st_size < sz) {
+            if (ftruncate(fd, (off_t)sz) != 0) {
+                close(fd);
+                printf("[BENCH][SHM] ftruncate failed name=%s errno=%d\n", name, BENCH_ERRNO());
+                return NULL;
+            }
         }
     }
     void* p = mmap(NULL, sz, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
     close(fd);
-    if (p == MAP_FAILED) return NULL;
+    if (p == MAP_FAILED) {
+        printf("[BENCH][SHM] mmap failed name=%s errno=%d\n", name, BENCH_ERRNO());
+        return NULL;
+    }
     if (out_size) *out_size = sz;
     return (shmsem_ring_t*)p;
 }
@@ -163,8 +213,17 @@ static int open_(bench_transport_t* t, const bench_endpoint_cfg_t* cfg)
     snprintf(s->name_tx, sizeof(s->name_tx), "%s", s->is_server ? s2c : c2s);
 
     s->rx_sem = sem_open(s->is_server ? c2s_sem : s2c_sem, O_CREAT, 0666, 0);
+    if (s->rx_sem == SEM_FAILED) {
+        printf("[BENCH][SHM] sem_open(rx) failed name=%s errno=%d\n",
+               s->is_server ? c2s_sem : s2c_sem, BENCH_ERRNO());
+        return -1;
+    }
     s->tx_sem = sem_open(s->is_server ? s2c_sem : c2s_sem, O_CREAT, 0666, 0);
-    if (s->rx_sem == SEM_FAILED || s->tx_sem == SEM_FAILED) return -1;
+    if (s->tx_sem == SEM_FAILED) {
+        printf("[BENCH][SHM] sem_open(tx) failed name=%s errno=%d\n",
+               s->is_server ? s2c_sem : c2s_sem, BENCH_ERRNO());
+        return -1;
+    }
     snprintf(s->sem_rx, sizeof(s->sem_rx), "%s", s->is_server ? c2s_sem : s2c_sem);
     snprintf(s->sem_tx, sizeof(s->sem_tx), "%s", s->is_server ? s2c_sem : c2s_sem);
     return 0;

@@ -31,17 +31,22 @@ VX_SYSROOT ?= $(VSB_DIR_POSIX)
 ifeq ($(strip $(VX_SYSROOT)),)
 $(warning VX_SYSROOT is empty. Set VSB_DIR or WIND_CC_SYSROOT for VxWorks builds.)
 endif
-VX_INCLUDE_DIRS ?= \
+VX_INCLUDE_DIRS_COMMON ?= \
 	$(VX_SYSROOT)/usr/h/public \
 	$(VX_SYSROOT)/usr/h \
-	$(VX_SYSROOT)/share/h/public \
-	$(WIND_BASE_POSIX)/source/os/core/user/h \
-	$(WIND_BASE_POSIX)/source/os/core/user/h/types \
+	$(VX_SYSROOT)/share/h/public
+VX_INCLUDE_DIRS_DKM ?= \
+	$(VX_INCLUDE_DIRS_COMMON) \
 	$(VX_SYSROOT)/krnl/h/public \
 	$(VX_SYSROOT)/krnl/h/public/base \
 	$(WIND_BASE_POSIX)/target/h
+VX_INCLUDE_DIRS_RTP ?= \
+	$(VX_INCLUDE_DIRS_COMMON) \
+	$(WIND_BASE_POSIX)/target/h
 VX_CPPFLAGS ?= -D_VSB_CONFIG_FILE=\"$(VX_SYSROOT)/h/config/vsbConfig.h\"
-VX_CFLAGS ?= $(VX_CPU_FLAGS) --sysroot=$(VX_SYSROOT) $(addprefix -I,$(VX_INCLUDE_DIRS)) $(VX_CPPFLAGS)
+VX_CFLAGS_COMMON ?= $(VX_CPU_FLAGS) --sysroot=$(VX_SYSROOT) $(addprefix -I,$(VX_INCLUDE_DIRS_COMMON)) $(VX_CPPFLAGS)
+VX_CFLAGS_DKM ?= $(VX_CPU_FLAGS) --sysroot=$(VX_SYSROOT) $(addprefix -I,$(VX_INCLUDE_DIRS_DKM)) $(VX_CPPFLAGS)
+VX_CFLAGS_RTP ?= $(VX_CPU_FLAGS) --sysroot=$(VX_SYSROOT) $(addprefix -I,$(VX_INCLUDE_DIRS_RTP)) $(VX_CPPFLAGS)
 VX_LDFLAGS ?= $(VX_CPU_FLAGS) --sysroot=$(VX_SYSROOT)
 
 # ---- Common include ----
@@ -50,14 +55,14 @@ INC_COMMON ?= -I$(ROOT_DIR)/common/include
 # ---- Toolchain / flags ----
 CC_COMMON ?= $(WR_CC)
 AR_COMMON ?= $(WR_AR)
-CFLAGS_COMMON ?= $(OPTFLAGS) $(VX_CFLAGS)
+CFLAGS_COMMON ?= $(OPTFLAGS) $(VX_CFLAGS_COMMON)
 
 CC_DKM ?= $(WR_CC)
 LD_DKM ?= $(WR_CC)
-CFLAGS_DKM ?= $(OPTFLAGS) $(VX_CFLAGS) -D_WRS_KERNEL
+CFLAGS_DKM ?= $(OPTFLAGS) $(VX_CFLAGS_DKM) -D_WRS_KERNEL -U__RTP__
 LDFLAGS_DKM ?= $(VX_LDFLAGS) -r
 
 CC_RTP ?= $(WR_CC)
 LD_RTP ?= $(WR_CC)
-CFLAGS_RTP ?= $(OPTFLAGS) $(VX_CFLAGS) -D__RTP__
+CFLAGS_RTP ?= $(OPTFLAGS) $(VX_CFLAGS_RTP) -D__RTP__
 LDFLAGS_RTP ?= $(VX_LDFLAGS) -rtp -static
