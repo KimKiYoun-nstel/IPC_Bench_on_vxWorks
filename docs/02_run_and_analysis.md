@@ -166,3 +166,438 @@
   - `-> sysTimestampFreq()` (0이 아니면 고해상도 타임스탬프 사용 가능)
 - DKM에서는 `sysTimestampFreq()`가 0이 아니면 자동으로 **고해상도 타임스탬프**를 사용하도록 구현됨
 - `sysTimestampFreq()`가 0이면 tick 기반으로 동작하므로 1ms 이하 측정이 0ns로 나올 수 있음
+
+# RR ?? ?? (?? IPC, ?? ??)
+## UDP (RTP ?? + DKM ?????)
+- RTP ??:
+  - rtp exec bench_rtp.vxe -- -s --transport udp --bind 0.0.0.0 --port 41000 --mode rr --dur 65 --tag udp_srv
+- DKM ????? (16? ??):
+```
+C benchClientRun("udp","127.0.0.1",41000,0,"udp_rr_r200_p256",1,200,60,256)
+C benchClientRun("udp","127.0.0.1",41000,0,"udp_rr_r200_p512",1,200,60,512)
+C benchClientRun("udp","127.0.0.1",41000,0,"udp_rr_r200_p1024",1,200,60,1024)
+C benchClientRun("udp","127.0.0.1",41000,0,"udp_rr_r200_p1500",1,200,60,1500)
+C benchClientRun("udp","127.0.0.1",41000,0,"udp_rr_r400_p256",1,400,60,256)
+C benchClientRun("udp","127.0.0.1",41000,0,"udp_rr_r400_p512",1,400,60,512)
+C benchClientRun("udp","127.0.0.1",41000,0,"udp_rr_r400_p1024",1,400,60,1024)
+C benchClientRun("udp","127.0.0.1",41000,0,"udp_rr_r400_p1500",1,400,60,1500)
+C benchClientRun("udp","127.0.0.1",41000,0,"udp_rr_r800_p256",1,800,60,256)
+C benchClientRun("udp","127.0.0.1",41000,0,"udp_rr_r800_p512",1,800,60,512)
+C benchClientRun("udp","127.0.0.1",41000,0,"udp_rr_r800_p1024",1,800,60,1024)
+C benchClientRun("udp","127.0.0.1",41000,0,"udp_rr_r800_p1500",1,800,60,1500)
+C benchClientRun("udp","127.0.0.1",41000,0,"udp_rr_r100_p256",1,100,60,256)
+C benchClientRun("udp","127.0.0.1",41000,0,"udp_rr_r100_p512",1,100,60,512)
+C benchClientRun("udp","127.0.0.1",41000,0,"udp_rr_r100_p1024",1,100,60,1024)
+C benchClientRun("udp","127.0.0.1",41000,0,"udp_rr_r100_p1500",1,100,60,1500)
+```
+## UDP (DKM ?? + RTP ?????)
+- DKM ??:
+  - C benchServerStartRR("udp","0.0.0.0",41000,0,65)
+- RTP ????? (16? ??):
+```
+rtp exec bench_rtp.vxe -- -c --transport udp --dst 127.0.0.1 --port 41000 --mode rr --rate 200 --dur 60 --payload 256 --tag udp_rr_r200_p256
+rtp exec bench_rtp.vxe -- -c --transport udp --dst 127.0.0.1 --port 41000 --mode rr --rate 200 --dur 60 --payload 512 --tag udp_rr_r200_p512
+rtp exec bench_rtp.vxe -- -c --transport udp --dst 127.0.0.1 --port 41000 --mode rr --rate 200 --dur 60 --payload 1024 --tag udp_rr_r200_p1024
+rtp exec bench_rtp.vxe -- -c --transport udp --dst 127.0.0.1 --port 41000 --mode rr --rate 200 --dur 60 --payload 1500 --tag udp_rr_r200_p1500
+rtp exec bench_rtp.vxe -- -c --transport udp --dst 127.0.0.1 --port 41000 --mode rr --rate 400 --dur 60 --payload 256 --tag udp_rr_r400_p256
+rtp exec bench_rtp.vxe -- -c --transport udp --dst 127.0.0.1 --port 41000 --mode rr --rate 400 --dur 60 --payload 512 --tag udp_rr_r400_p512
+rtp exec bench_rtp.vxe -- -c --transport udp --dst 127.0.0.1 --port 41000 --mode rr --rate 400 --dur 60 --payload 1024 --tag udp_rr_r400_p1024
+rtp exec bench_rtp.vxe -- -c --transport udp --dst 127.0.0.1 --port 41000 --mode rr --rate 400 --dur 60 --payload 1500 --tag udp_rr_r400_p1500
+rtp exec bench_rtp.vxe -- -c --transport udp --dst 127.0.0.1 --port 41000 --mode rr --rate 800 --dur 60 --payload 256 --tag udp_rr_r800_p256
+rtp exec bench_rtp.vxe -- -c --transport udp --dst 127.0.0.1 --port 41000 --mode rr --rate 800 --dur 60 --payload 512 --tag udp_rr_r800_p512
+rtp exec bench_rtp.vxe -- -c --transport udp --dst 127.0.0.1 --port 41000 --mode rr --rate 800 --dur 60 --payload 1024 --tag udp_rr_r800_p1024
+rtp exec bench_rtp.vxe -- -c --transport udp --dst 127.0.0.1 --port 41000 --mode rr --rate 800 --dur 60 --payload 1500 --tag udp_rr_r800_p1500
+rtp exec bench_rtp.vxe -- -c --transport udp --dst 127.0.0.1 --port 41000 --mode rr --rate 100 --dur 60 --payload 256 --tag udp_rr_r100_p256
+rtp exec bench_rtp.vxe -- -c --transport udp --dst 127.0.0.1 --port 41000 --mode rr --rate 100 --dur 60 --payload 512 --tag udp_rr_r100_p512
+rtp exec bench_rtp.vxe -- -c --transport udp --dst 127.0.0.1 --port 41000 --mode rr --rate 100 --dur 60 --payload 1024 --tag udp_rr_r100_p1024
+rtp exec bench_rtp.vxe -- -c --transport udp --dst 127.0.0.1 --port 41000 --mode rr --rate 100 --dur 60 --payload 1500 --tag udp_rr_r100_p1500
+```
+## msgQ (RTP ?? + DKM ?????)
+- RTP ??:
+  - rtp exec bench_rtp.vxe -- -s --transport msgq --bind bench_msgq --port 0 --mode rr --dur 65 --tag msgq_srv
+- DKM ????? (16? ??):
+```
+C benchClientRun("msgq","bench_msgq",0,0,"msgq_rr_r200_p256",1,200,60,256)
+C benchClientRun("msgq","bench_msgq",0,0,"msgq_rr_r200_p512",1,200,60,512)
+C benchClientRun("msgq","bench_msgq",0,0,"msgq_rr_r200_p1024",1,200,60,1024)
+C benchClientRun("msgq","bench_msgq",0,0,"msgq_rr_r200_p1500",1,200,60,1500)
+C benchClientRun("msgq","bench_msgq",0,0,"msgq_rr_r400_p256",1,400,60,256)
+C benchClientRun("msgq","bench_msgq",0,0,"msgq_rr_r400_p512",1,400,60,512)
+C benchClientRun("msgq","bench_msgq",0,0,"msgq_rr_r400_p1024",1,400,60,1024)
+C benchClientRun("msgq","bench_msgq",0,0,"msgq_rr_r400_p1500",1,400,60,1500)
+C benchClientRun("msgq","bench_msgq",0,0,"msgq_rr_r800_p256",1,800,60,256)
+C benchClientRun("msgq","bench_msgq",0,0,"msgq_rr_r800_p512",1,800,60,512)
+C benchClientRun("msgq","bench_msgq",0,0,"msgq_rr_r800_p1024",1,800,60,1024)
+C benchClientRun("msgq","bench_msgq",0,0,"msgq_rr_r800_p1500",1,800,60,1500)
+C benchClientRun("msgq","bench_msgq",0,0,"msgq_rr_r100_p256",1,100,60,256)
+C benchClientRun("msgq","bench_msgq",0,0,"msgq_rr_r100_p512",1,100,60,512)
+C benchClientRun("msgq","bench_msgq",0,0,"msgq_rr_r100_p1024",1,100,60,1024)
+C benchClientRun("msgq","bench_msgq",0,0,"msgq_rr_r100_p1500",1,100,60,1500)
+```
+## msgQ (DKM ?? + RTP ?????)
+- DKM ??:
+  - C benchServerStartRR("msgq","bench_msgq",0,0,65)
+- RTP ????? (16? ??):
+```
+rtp exec bench_rtp.vxe -- -c --transport msgq --dst bench_msgq --port 0 --mode rr --rate 200 --dur 60 --payload 256 --tag msgq_rr_r200_p256
+rtp exec bench_rtp.vxe -- -c --transport msgq --dst bench_msgq --port 0 --mode rr --rate 200 --dur 60 --payload 512 --tag msgq_rr_r200_p512
+rtp exec bench_rtp.vxe -- -c --transport msgq --dst bench_msgq --port 0 --mode rr --rate 200 --dur 60 --payload 1024 --tag msgq_rr_r200_p1024
+rtp exec bench_rtp.vxe -- -c --transport msgq --dst bench_msgq --port 0 --mode rr --rate 200 --dur 60 --payload 1500 --tag msgq_rr_r200_p1500
+rtp exec bench_rtp.vxe -- -c --transport msgq --dst bench_msgq --port 0 --mode rr --rate 400 --dur 60 --payload 256 --tag msgq_rr_r400_p256
+rtp exec bench_rtp.vxe -- -c --transport msgq --dst bench_msgq --port 0 --mode rr --rate 400 --dur 60 --payload 512 --tag msgq_rr_r400_p512
+rtp exec bench_rtp.vxe -- -c --transport msgq --dst bench_msgq --port 0 --mode rr --rate 400 --dur 60 --payload 1024 --tag msgq_rr_r400_p1024
+rtp exec bench_rtp.vxe -- -c --transport msgq --dst bench_msgq --port 0 --mode rr --rate 400 --dur 60 --payload 1500 --tag msgq_rr_r400_p1500
+rtp exec bench_rtp.vxe -- -c --transport msgq --dst bench_msgq --port 0 --mode rr --rate 800 --dur 60 --payload 256 --tag msgq_rr_r800_p256
+rtp exec bench_rtp.vxe -- -c --transport msgq --dst bench_msgq --port 0 --mode rr --rate 800 --dur 60 --payload 512 --tag msgq_rr_r800_p512
+rtp exec bench_rtp.vxe -- -c --transport msgq --dst bench_msgq --port 0 --mode rr --rate 800 --dur 60 --payload 1024 --tag msgq_rr_r800_p1024
+rtp exec bench_rtp.vxe -- -c --transport msgq --dst bench_msgq --port 0 --mode rr --rate 800 --dur 60 --payload 1500 --tag msgq_rr_r800_p1500
+rtp exec bench_rtp.vxe -- -c --transport msgq --dst bench_msgq --port 0 --mode rr --rate 100 --dur 60 --payload 256 --tag msgq_rr_r100_p256
+rtp exec bench_rtp.vxe -- -c --transport msgq --dst bench_msgq --port 0 --mode rr --rate 100 --dur 60 --payload 512 --tag msgq_rr_r100_p512
+rtp exec bench_rtp.vxe -- -c --transport msgq --dst bench_msgq --port 0 --mode rr --rate 100 --dur 60 --payload 1024 --tag msgq_rr_r100_p1024
+rtp exec bench_rtp.vxe -- -c --transport msgq --dst bench_msgq --port 0 --mode rr --rate 100 --dur 60 --payload 1500 --tag msgq_rr_r100_p1500
+```
+## shmsem (RTP ?? + DKM ?????)
+- RTP ??:
+  - rtp exec bench_rtp.vxe -- -s --transport shmsem --bind bench_shm --port 0 --mode rr --dur 65 --tag shmsem_srv
+- DKM ????? (16? ??):
+```
+C benchClientRun("shmsem","bench_shm",0,0,"shmsem_rr_r200_p256",1,200,60,256)
+C benchClientRun("shmsem","bench_shm",0,0,"shmsem_rr_r200_p512",1,200,60,512)
+C benchClientRun("shmsem","bench_shm",0,0,"shmsem_rr_r200_p1024",1,200,60,1024)
+C benchClientRun("shmsem","bench_shm",0,0,"shmsem_rr_r200_p1500",1,200,60,1500)
+C benchClientRun("shmsem","bench_shm",0,0,"shmsem_rr_r400_p256",1,400,60,256)
+C benchClientRun("shmsem","bench_shm",0,0,"shmsem_rr_r400_p512",1,400,60,512)
+C benchClientRun("shmsem","bench_shm",0,0,"shmsem_rr_r400_p1024",1,400,60,1024)
+C benchClientRun("shmsem","bench_shm",0,0,"shmsem_rr_r400_p1500",1,400,60,1500)
+C benchClientRun("shmsem","bench_shm",0,0,"shmsem_rr_r800_p256",1,800,60,256)
+C benchClientRun("shmsem","bench_shm",0,0,"shmsem_rr_r800_p512",1,800,60,512)
+C benchClientRun("shmsem","bench_shm",0,0,"shmsem_rr_r800_p1024",1,800,60,1024)
+C benchClientRun("shmsem","bench_shm",0,0,"shmsem_rr_r800_p1500",1,800,60,1500)
+C benchClientRun("shmsem","bench_shm",0,0,"shmsem_rr_r100_p256",1,100,60,256)
+C benchClientRun("shmsem","bench_shm",0,0,"shmsem_rr_r100_p512",1,100,60,512)
+C benchClientRun("shmsem","bench_shm",0,0,"shmsem_rr_r100_p1024",1,100,60,1024)
+C benchClientRun("shmsem","bench_shm",0,0,"shmsem_rr_r100_p1500",1,100,60,1500)
+```
+## shmsem (DKM ?? + RTP ?????)
+- DKM ??:
+  - C benchServerStartRR("shmsem","bench_shm",0,0,65)
+- RTP ????? (16? ??):
+```
+rtp exec bench_rtp.vxe -- -c --transport shmsem --dst bench_shm --port 0 --mode rr --rate 200 --dur 60 --payload 256 --tag shmsem_rr_r200_p256
+rtp exec bench_rtp.vxe -- -c --transport shmsem --dst bench_shm --port 0 --mode rr --rate 200 --dur 60 --payload 512 --tag shmsem_rr_r200_p512
+rtp exec bench_rtp.vxe -- -c --transport shmsem --dst bench_shm --port 0 --mode rr --rate 200 --dur 60 --payload 1024 --tag shmsem_rr_r200_p1024
+rtp exec bench_rtp.vxe -- -c --transport shmsem --dst bench_shm --port 0 --mode rr --rate 200 --dur 60 --payload 1500 --tag shmsem_rr_r200_p1500
+rtp exec bench_rtp.vxe -- -c --transport shmsem --dst bench_shm --port 0 --mode rr --rate 400 --dur 60 --payload 256 --tag shmsem_rr_r400_p256
+rtp exec bench_rtp.vxe -- -c --transport shmsem --dst bench_shm --port 0 --mode rr --rate 400 --dur 60 --payload 512 --tag shmsem_rr_r400_p512
+rtp exec bench_rtp.vxe -- -c --transport shmsem --dst bench_shm --port 0 --mode rr --rate 400 --dur 60 --payload 1024 --tag shmsem_rr_r400_p1024
+rtp exec bench_rtp.vxe -- -c --transport shmsem --dst bench_shm --port 0 --mode rr --rate 400 --dur 60 --payload 1500 --tag shmsem_rr_r400_p1500
+rtp exec bench_rtp.vxe -- -c --transport shmsem --dst bench_shm --port 0 --mode rr --rate 800 --dur 60 --payload 256 --tag shmsem_rr_r800_p256
+rtp exec bench_rtp.vxe -- -c --transport shmsem --dst bench_shm --port 0 --mode rr --rate 800 --dur 60 --payload 512 --tag shmsem_rr_r800_p512
+rtp exec bench_rtp.vxe -- -c --transport shmsem --dst bench_shm --port 0 --mode rr --rate 800 --dur 60 --payload 1024 --tag shmsem_rr_r800_p1024
+rtp exec bench_rtp.vxe -- -c --transport shmsem --dst bench_shm --port 0 --mode rr --rate 800 --dur 60 --payload 1500 --tag shmsem_rr_r800_p1500
+rtp exec bench_rtp.vxe -- -c --transport shmsem --dst bench_shm --port 0 --mode rr --rate 100 --dur 60 --payload 256 --tag shmsem_rr_r100_p256
+rtp exec bench_rtp.vxe -- -c --transport shmsem --dst bench_shm --port 0 --mode rr --rate 100 --dur 60 --payload 512 --tag shmsem_rr_r100_p512
+rtp exec bench_rtp.vxe -- -c --transport shmsem --dst bench_shm --port 0 --mode rr --rate 100 --dur 60 --payload 1024 --tag shmsem_rr_r100_p1024
+rtp exec bench_rtp.vxe -- -c --transport shmsem --dst bench_shm --port 0 --mode rr --rate 100 --dur 60 --payload 1500 --tag shmsem_rr_r100_p1500
+```
+# ONEWAY ?? ?? (?? IPC, ?? ??)
+## UDP (RTP ?? RX + DKM ????? TX)
+```
+rtp exec bench_rtp.vxe -- -s --transport udp --bind 0.0.0.0 --port 41000 --mode oneway --rate 200 --dur 65 --payload 256 --tag udp_ow_srv_r200_p256
+C benchClientRun("udp","127.0.0.1",41000,0,"udp_ow_r200_p256",0,200,60,256)
+
+rtp exec bench_rtp.vxe -- -s --transport udp --bind 0.0.0.0 --port 41000 --mode oneway --rate 200 --dur 65 --payload 512 --tag udp_ow_srv_r200_p512
+C benchClientRun("udp","127.0.0.1",41000,0,"udp_ow_r200_p512",0,200,60,512)
+
+rtp exec bench_rtp.vxe -- -s --transport udp --bind 0.0.0.0 --port 41000 --mode oneway --rate 200 --dur 65 --payload 1024 --tag udp_ow_srv_r200_p1024
+C benchClientRun("udp","127.0.0.1",41000,0,"udp_ow_r200_p1024",0,200,60,1024)
+
+rtp exec bench_rtp.vxe -- -s --transport udp --bind 0.0.0.0 --port 41000 --mode oneway --rate 200 --dur 65 --payload 1500 --tag udp_ow_srv_r200_p1500
+C benchClientRun("udp","127.0.0.1",41000,0,"udp_ow_r200_p1500",0,200,60,1500)
+
+rtp exec bench_rtp.vxe -- -s --transport udp --bind 0.0.0.0 --port 41000 --mode oneway --rate 400 --dur 65 --payload 256 --tag udp_ow_srv_r400_p256
+C benchClientRun("udp","127.0.0.1",41000,0,"udp_ow_r400_p256",0,400,60,256)
+
+rtp exec bench_rtp.vxe -- -s --transport udp --bind 0.0.0.0 --port 41000 --mode oneway --rate 400 --dur 65 --payload 512 --tag udp_ow_srv_r400_p512
+C benchClientRun("udp","127.0.0.1",41000,0,"udp_ow_r400_p512",0,400,60,512)
+
+rtp exec bench_rtp.vxe -- -s --transport udp --bind 0.0.0.0 --port 41000 --mode oneway --rate 400 --dur 65 --payload 1024 --tag udp_ow_srv_r400_p1024
+C benchClientRun("udp","127.0.0.1",41000,0,"udp_ow_r400_p1024",0,400,60,1024)
+
+rtp exec bench_rtp.vxe -- -s --transport udp --bind 0.0.0.0 --port 41000 --mode oneway --rate 400 --dur 65 --payload 1500 --tag udp_ow_srv_r400_p1500
+C benchClientRun("udp","127.0.0.1",41000,0,"udp_ow_r400_p1500",0,400,60,1500)
+
+rtp exec bench_rtp.vxe -- -s --transport udp --bind 0.0.0.0 --port 41000 --mode oneway --rate 800 --dur 65 --payload 256 --tag udp_ow_srv_r800_p256
+C benchClientRun("udp","127.0.0.1",41000,0,"udp_ow_r800_p256",0,800,60,256)
+
+rtp exec bench_rtp.vxe -- -s --transport udp --bind 0.0.0.0 --port 41000 --mode oneway --rate 800 --dur 65 --payload 512 --tag udp_ow_srv_r800_p512
+C benchClientRun("udp","127.0.0.1",41000,0,"udp_ow_r800_p512",0,800,60,512)
+
+rtp exec bench_rtp.vxe -- -s --transport udp --bind 0.0.0.0 --port 41000 --mode oneway --rate 800 --dur 65 --payload 1024 --tag udp_ow_srv_r800_p1024
+C benchClientRun("udp","127.0.0.1",41000,0,"udp_ow_r800_p1024",0,800,60,1024)
+
+rtp exec bench_rtp.vxe -- -s --transport udp --bind 0.0.0.0 --port 41000 --mode oneway --rate 800 --dur 65 --payload 1500 --tag udp_ow_srv_r800_p1500
+C benchClientRun("udp","127.0.0.1",41000,0,"udp_ow_r800_p1500",0,800,60,1500)
+
+rtp exec bench_rtp.vxe -- -s --transport udp --bind 0.0.0.0 --port 41000 --mode oneway --rate 100 --dur 65 --payload 256 --tag udp_ow_srv_r100_p256
+C benchClientRun("udp","127.0.0.1",41000,0,"udp_ow_r100_p256",0,100,60,256)
+
+rtp exec bench_rtp.vxe -- -s --transport udp --bind 0.0.0.0 --port 41000 --mode oneway --rate 100 --dur 65 --payload 512 --tag udp_ow_srv_r100_p512
+C benchClientRun("udp","127.0.0.1",41000,0,"udp_ow_r100_p512",0,100,60,512)
+
+rtp exec bench_rtp.vxe -- -s --transport udp --bind 0.0.0.0 --port 41000 --mode oneway --rate 100 --dur 65 --payload 1024 --tag udp_ow_srv_r100_p1024
+C benchClientRun("udp","127.0.0.1",41000,0,"udp_ow_r100_p1024",0,100,60,1024)
+
+rtp exec bench_rtp.vxe -- -s --transport udp --bind 0.0.0.0 --port 41000 --mode oneway --rate 100 --dur 65 --payload 1500 --tag udp_ow_srv_r100_p1500
+C benchClientRun("udp","127.0.0.1",41000,0,"udp_ow_r100_p1500",0,100,60,1500)
+```
+## UDP (DKM ?? RX + RTP ????? TX)
+```
+C benchServerStart("udp","0.0.0.0",41000,0,0,200,65,256)
+rtp exec bench_rtp.vxe -- -c --transport udp --dst 127.0.0.1 --port 41000 --mode oneway --rate 200 --dur 60 --payload 256 --tag udp_ow_r200_p256
+
+C benchServerStart("udp","0.0.0.0",41000,0,0,200,65,512)
+rtp exec bench_rtp.vxe -- -c --transport udp --dst 127.0.0.1 --port 41000 --mode oneway --rate 200 --dur 60 --payload 512 --tag udp_ow_r200_p512
+
+C benchServerStart("udp","0.0.0.0",41000,0,0,200,65,1024)
+rtp exec bench_rtp.vxe -- -c --transport udp --dst 127.0.0.1 --port 41000 --mode oneway --rate 200 --dur 60 --payload 1024 --tag udp_ow_r200_p1024
+
+C benchServerStart("udp","0.0.0.0",41000,0,0,200,65,1500)
+rtp exec bench_rtp.vxe -- -c --transport udp --dst 127.0.0.1 --port 41000 --mode oneway --rate 200 --dur 60 --payload 1500 --tag udp_ow_r200_p1500
+
+C benchServerStart("udp","0.0.0.0",41000,0,0,400,65,256)
+rtp exec bench_rtp.vxe -- -c --transport udp --dst 127.0.0.1 --port 41000 --mode oneway --rate 400 --dur 60 --payload 256 --tag udp_ow_r400_p256
+
+C benchServerStart("udp","0.0.0.0",41000,0,0,400,65,512)
+rtp exec bench_rtp.vxe -- -c --transport udp --dst 127.0.0.1 --port 41000 --mode oneway --rate 400 --dur 60 --payload 512 --tag udp_ow_r400_p512
+
+C benchServerStart("udp","0.0.0.0",41000,0,0,400,65,1024)
+rtp exec bench_rtp.vxe -- -c --transport udp --dst 127.0.0.1 --port 41000 --mode oneway --rate 400 --dur 60 --payload 1024 --tag udp_ow_r400_p1024
+
+C benchServerStart("udp","0.0.0.0",41000,0,0,400,65,1500)
+rtp exec bench_rtp.vxe -- -c --transport udp --dst 127.0.0.1 --port 41000 --mode oneway --rate 400 --dur 60 --payload 1500 --tag udp_ow_r400_p1500
+
+C benchServerStart("udp","0.0.0.0",41000,0,0,800,65,256)
+rtp exec bench_rtp.vxe -- -c --transport udp --dst 127.0.0.1 --port 41000 --mode oneway --rate 800 --dur 60 --payload 256 --tag udp_ow_r800_p256
+
+C benchServerStart("udp","0.0.0.0",41000,0,0,800,65,512)
+rtp exec bench_rtp.vxe -- -c --transport udp --dst 127.0.0.1 --port 41000 --mode oneway --rate 800 --dur 60 --payload 512 --tag udp_ow_r800_p512
+
+C benchServerStart("udp","0.0.0.0",41000,0,0,800,65,1024)
+rtp exec bench_rtp.vxe -- -c --transport udp --dst 127.0.0.1 --port 41000 --mode oneway --rate 800 --dur 60 --payload 1024 --tag udp_ow_r800_p1024
+
+C benchServerStart("udp","0.0.0.0",41000,0,0,800,65,1500)
+rtp exec bench_rtp.vxe -- -c --transport udp --dst 127.0.0.1 --port 41000 --mode oneway --rate 800 --dur 60 --payload 1500 --tag udp_ow_r800_p1500
+
+C benchServerStart("udp","0.0.0.0",41000,0,0,100,65,256)
+rtp exec bench_rtp.vxe -- -c --transport udp --dst 127.0.0.1 --port 41000 --mode oneway --rate 100 --dur 60 --payload 256 --tag udp_ow_r100_p256
+
+C benchServerStart("udp","0.0.0.0",41000,0,0,100,65,512)
+rtp exec bench_rtp.vxe -- -c --transport udp --dst 127.0.0.1 --port 41000 --mode oneway --rate 100 --dur 60 --payload 512 --tag udp_ow_r100_p512
+
+C benchServerStart("udp","0.0.0.0",41000,0,0,100,65,1024)
+rtp exec bench_rtp.vxe -- -c --transport udp --dst 127.0.0.1 --port 41000 --mode oneway --rate 100 --dur 60 --payload 1024 --tag udp_ow_r100_p1024
+
+C benchServerStart("udp","0.0.0.0",41000,0,0,100,65,1500)
+rtp exec bench_rtp.vxe -- -c --transport udp --dst 127.0.0.1 --port 41000 --mode oneway --rate 100 --dur 60 --payload 1500 --tag udp_ow_r100_p1500
+```
+## msgQ (RTP ?? RX + DKM ????? TX)
+```
+rtp exec bench_rtp.vxe -- -s --transport msgq --bind bench_msgq --port 0 --mode oneway --rate 200 --dur 65 --payload 256 --tag msgq_ow_srv_r200_p256
+C benchClientRun("msgq","bench_msgq",0,0,"msgq_ow_r200_p256",0,200,60,256)
+
+rtp exec bench_rtp.vxe -- -s --transport msgq --bind bench_msgq --port 0 --mode oneway --rate 200 --dur 65 --payload 512 --tag msgq_ow_srv_r200_p512
+C benchClientRun("msgq","bench_msgq",0,0,"msgq_ow_r200_p512",0,200,60,512)
+
+rtp exec bench_rtp.vxe -- -s --transport msgq --bind bench_msgq --port 0 --mode oneway --rate 200 --dur 65 --payload 1024 --tag msgq_ow_srv_r200_p1024
+C benchClientRun("msgq","bench_msgq",0,0,"msgq_ow_r200_p1024",0,200,60,1024)
+
+rtp exec bench_rtp.vxe -- -s --transport msgq --bind bench_msgq --port 0 --mode oneway --rate 200 --dur 65 --payload 1500 --tag msgq_ow_srv_r200_p1500
+C benchClientRun("msgq","bench_msgq",0,0,"msgq_ow_r200_p1500",0,200,60,1500)
+
+rtp exec bench_rtp.vxe -- -s --transport msgq --bind bench_msgq --port 0 --mode oneway --rate 400 --dur 65 --payload 256 --tag msgq_ow_srv_r400_p256
+C benchClientRun("msgq","bench_msgq",0,0,"msgq_ow_r400_p256",0,400,60,256)
+
+rtp exec bench_rtp.vxe -- -s --transport msgq --bind bench_msgq --port 0 --mode oneway --rate 400 --dur 65 --payload 512 --tag msgq_ow_srv_r400_p512
+C benchClientRun("msgq","bench_msgq",0,0,"msgq_ow_r400_p512",0,400,60,512)
+
+rtp exec bench_rtp.vxe -- -s --transport msgq --bind bench_msgq --port 0 --mode oneway --rate 400 --dur 65 --payload 1024 --tag msgq_ow_srv_r400_p1024
+C benchClientRun("msgq","bench_msgq",0,0,"msgq_ow_r400_p1024",0,400,60,1024)
+
+rtp exec bench_rtp.vxe -- -s --transport msgq --bind bench_msgq --port 0 --mode oneway --rate 400 --dur 65 --payload 1500 --tag msgq_ow_srv_r400_p1500
+C benchClientRun("msgq","bench_msgq",0,0,"msgq_ow_r400_p1500",0,400,60,1500)
+
+rtp exec bench_rtp.vxe -- -s --transport msgq --bind bench_msgq --port 0 --mode oneway --rate 800 --dur 65 --payload 256 --tag msgq_ow_srv_r800_p256
+C benchClientRun("msgq","bench_msgq",0,0,"msgq_ow_r800_p256",0,800,60,256)
+
+rtp exec bench_rtp.vxe -- -s --transport msgq --bind bench_msgq --port 0 --mode oneway --rate 800 --dur 65 --payload 512 --tag msgq_ow_srv_r800_p512
+C benchClientRun("msgq","bench_msgq",0,0,"msgq_ow_r800_p512",0,800,60,512)
+
+rtp exec bench_rtp.vxe -- -s --transport msgq --bind bench_msgq --port 0 --mode oneway --rate 800 --dur 65 --payload 1024 --tag msgq_ow_srv_r800_p1024
+C benchClientRun("msgq","bench_msgq",0,0,"msgq_ow_r800_p1024",0,800,60,1024)
+
+rtp exec bench_rtp.vxe -- -s --transport msgq --bind bench_msgq --port 0 --mode oneway --rate 800 --dur 65 --payload 1500 --tag msgq_ow_srv_r800_p1500
+C benchClientRun("msgq","bench_msgq",0,0,"msgq_ow_r800_p1500",0,800,60,1500)
+
+rtp exec bench_rtp.vxe -- -s --transport msgq --bind bench_msgq --port 0 --mode oneway --rate 100 --dur 65 --payload 256 --tag msgq_ow_srv_r100_p256
+C benchClientRun("msgq","bench_msgq",0,0,"msgq_ow_r100_p256",0,100,60,256)
+
+rtp exec bench_rtp.vxe -- -s --transport msgq --bind bench_msgq --port 0 --mode oneway --rate 100 --dur 65 --payload 512 --tag msgq_ow_srv_r100_p512
+C benchClientRun("msgq","bench_msgq",0,0,"msgq_ow_r100_p512",0,100,60,512)
+
+rtp exec bench_rtp.vxe -- -s --transport msgq --bind bench_msgq --port 0 --mode oneway --rate 100 --dur 65 --payload 1024 --tag msgq_ow_srv_r100_p1024
+C benchClientRun("msgq","bench_msgq",0,0,"msgq_ow_r100_p1024",0,100,60,1024)
+
+rtp exec bench_rtp.vxe -- -s --transport msgq --bind bench_msgq --port 0 --mode oneway --rate 100 --dur 65 --payload 1500 --tag msgq_ow_srv_r100_p1500
+C benchClientRun("msgq","bench_msgq",0,0,"msgq_ow_r100_p1500",0,100,60,1500)
+```
+## msgQ (DKM ?? RX + RTP ????? TX)
+```
+C benchServerStart("msgq","bench_msgq",0,0,0,200,65,256)
+rtp exec bench_rtp.vxe -- -c --transport msgq --dst bench_msgq --port 0 --mode oneway --rate 200 --dur 60 --payload 256 --tag msgq_ow_r200_p256
+
+C benchServerStart("msgq","bench_msgq",0,0,0,200,65,512)
+rtp exec bench_rtp.vxe -- -c --transport msgq --dst bench_msgq --port 0 --mode oneway --rate 200 --dur 60 --payload 512 --tag msgq_ow_r200_p512
+
+C benchServerStart("msgq","bench_msgq",0,0,0,200,65,1024)
+rtp exec bench_rtp.vxe -- -c --transport msgq --dst bench_msgq --port 0 --mode oneway --rate 200 --dur 60 --payload 1024 --tag msgq_ow_r200_p1024
+
+C benchServerStart("msgq","bench_msgq",0,0,0,200,65,1500)
+rtp exec bench_rtp.vxe -- -c --transport msgq --dst bench_msgq --port 0 --mode oneway --rate 200 --dur 60 --payload 1500 --tag msgq_ow_r200_p1500
+
+C benchServerStart("msgq","bench_msgq",0,0,0,400,65,256)
+rtp exec bench_rtp.vxe -- -c --transport msgq --dst bench_msgq --port 0 --mode oneway --rate 400 --dur 60 --payload 256 --tag msgq_ow_r400_p256
+
+C benchServerStart("msgq","bench_msgq",0,0,0,400,65,512)
+rtp exec bench_rtp.vxe -- -c --transport msgq --dst bench_msgq --port 0 --mode oneway --rate 400 --dur 60 --payload 512 --tag msgq_ow_r400_p512
+
+C benchServerStart("msgq","bench_msgq",0,0,0,400,65,1024)
+rtp exec bench_rtp.vxe -- -c --transport msgq --dst bench_msgq --port 0 --mode oneway --rate 400 --dur 60 --payload 1024 --tag msgq_ow_r400_p1024
+
+C benchServerStart("msgq","bench_msgq",0,0,0,400,65,1500)
+rtp exec bench_rtp.vxe -- -c --transport msgq --dst bench_msgq --port 0 --mode oneway --rate 400 --dur 60 --payload 1500 --tag msgq_ow_r400_p1500
+
+C benchServerStart("msgq","bench_msgq",0,0,0,800,65,256)
+rtp exec bench_rtp.vxe -- -c --transport msgq --dst bench_msgq --port 0 --mode oneway --rate 800 --dur 60 --payload 256 --tag msgq_ow_r800_p256
+
+C benchServerStart("msgq","bench_msgq",0,0,0,800,65,512)
+rtp exec bench_rtp.vxe -- -c --transport msgq --dst bench_msgq --port 0 --mode oneway --rate 800 --dur 60 --payload 512 --tag msgq_ow_r800_p512
+
+C benchServerStart("msgq","bench_msgq",0,0,0,800,65,1024)
+rtp exec bench_rtp.vxe -- -c --transport msgq --dst bench_msgq --port 0 --mode oneway --rate 800 --dur 60 --payload 1024 --tag msgq_ow_r800_p1024
+
+C benchServerStart("msgq","bench_msgq",0,0,0,800,65,1500)
+rtp exec bench_rtp.vxe -- -c --transport msgq --dst bench_msgq --port 0 --mode oneway --rate 800 --dur 60 --payload 1500 --tag msgq_ow_r800_p1500
+
+C benchServerStart("msgq","bench_msgq",0,0,0,100,65,256)
+rtp exec bench_rtp.vxe -- -c --transport msgq --dst bench_msgq --port 0 --mode oneway --rate 100 --dur 60 --payload 256 --tag msgq_ow_r100_p256
+
+C benchServerStart("msgq","bench_msgq",0,0,0,100,65,512)
+rtp exec bench_rtp.vxe -- -c --transport msgq --dst bench_msgq --port 0 --mode oneway --rate 100 --dur 60 --payload 512 --tag msgq_ow_r100_p512
+
+C benchServerStart("msgq","bench_msgq",0,0,0,100,65,1024)
+rtp exec bench_rtp.vxe -- -c --transport msgq --dst bench_msgq --port 0 --mode oneway --rate 100 --dur 60 --payload 1024 --tag msgq_ow_r100_p1024
+
+C benchServerStart("msgq","bench_msgq",0,0,0,100,65,1500)
+rtp exec bench_rtp.vxe -- -c --transport msgq --dst bench_msgq --port 0 --mode oneway --rate 100 --dur 60 --payload 1500 --tag msgq_ow_r100_p1500
+```
+## shmsem (RTP ?? RX + DKM ????? TX)
+```
+rtp exec bench_rtp.vxe -- -s --transport shmsem --bind bench_shm --port 0 --mode oneway --rate 200 --dur 65 --payload 256 --tag shmsem_ow_srv_r200_p256
+C benchClientRun("shmsem","bench_shm",0,0,"shmsem_ow_r200_p256",0,200,60,256)
+
+rtp exec bench_rtp.vxe -- -s --transport shmsem --bind bench_shm --port 0 --mode oneway --rate 200 --dur 65 --payload 512 --tag shmsem_ow_srv_r200_p512
+C benchClientRun("shmsem","bench_shm",0,0,"shmsem_ow_r200_p512",0,200,60,512)
+
+rtp exec bench_rtp.vxe -- -s --transport shmsem --bind bench_shm --port 0 --mode oneway --rate 200 --dur 65 --payload 1024 --tag shmsem_ow_srv_r200_p1024
+C benchClientRun("shmsem","bench_shm",0,0,"shmsem_ow_r200_p1024",0,200,60,1024)
+
+rtp exec bench_rtp.vxe -- -s --transport shmsem --bind bench_shm --port 0 --mode oneway --rate 200 --dur 65 --payload 1500 --tag shmsem_ow_srv_r200_p1500
+C benchClientRun("shmsem","bench_shm",0,0,"shmsem_ow_r200_p1500",0,200,60,1500)
+
+rtp exec bench_rtp.vxe -- -s --transport shmsem --bind bench_shm --port 0 --mode oneway --rate 400 --dur 65 --payload 256 --tag shmsem_ow_srv_r400_p256
+C benchClientRun("shmsem","bench_shm",0,0,"shmsem_ow_r400_p256",0,400,60,256)
+
+rtp exec bench_rtp.vxe -- -s --transport shmsem --bind bench_shm --port 0 --mode oneway --rate 400 --dur 65 --payload 512 --tag shmsem_ow_srv_r400_p512
+C benchClientRun("shmsem","bench_shm",0,0,"shmsem_ow_r400_p512",0,400,60,512)
+
+rtp exec bench_rtp.vxe -- -s --transport shmsem --bind bench_shm --port 0 --mode oneway --rate 400 --dur 65 --payload 1024 --tag shmsem_ow_srv_r400_p1024
+C benchClientRun("shmsem","bench_shm",0,0,"shmsem_ow_r400_p1024",0,400,60,1024)
+
+rtp exec bench_rtp.vxe -- -s --transport shmsem --bind bench_shm --port 0 --mode oneway --rate 400 --dur 65 --payload 1500 --tag shmsem_ow_srv_r400_p1500
+C benchClientRun("shmsem","bench_shm",0,0,"shmsem_ow_r400_p1500",0,400,60,1500)
+
+rtp exec bench_rtp.vxe -- -s --transport shmsem --bind bench_shm --port 0 --mode oneway --rate 800 --dur 65 --payload 256 --tag shmsem_ow_srv_r800_p256
+C benchClientRun("shmsem","bench_shm",0,0,"shmsem_ow_r800_p256",0,800,60,256)
+
+rtp exec bench_rtp.vxe -- -s --transport shmsem --bind bench_shm --port 0 --mode oneway --rate 800 --dur 65 --payload 512 --tag shmsem_ow_srv_r800_p512
+C benchClientRun("shmsem","bench_shm",0,0,"shmsem_ow_r800_p512",0,800,60,512)
+
+rtp exec bench_rtp.vxe -- -s --transport shmsem --bind bench_shm --port 0 --mode oneway --rate 800 --dur 65 --payload 1024 --tag shmsem_ow_srv_r800_p1024
+C benchClientRun("shmsem","bench_shm",0,0,"shmsem_ow_r800_p1024",0,800,60,1024)
+
+rtp exec bench_rtp.vxe -- -s --transport shmsem --bind bench_shm --port 0 --mode oneway --rate 800 --dur 65 --payload 1500 --tag shmsem_ow_srv_r800_p1500
+C benchClientRun("shmsem","bench_shm",0,0,"shmsem_ow_r800_p1500",0,800,60,1500)
+
+rtp exec bench_rtp.vxe -- -s --transport shmsem --bind bench_shm --port 0 --mode oneway --rate 100 --dur 65 --payload 256 --tag shmsem_ow_srv_r100_p256
+C benchClientRun("shmsem","bench_shm",0,0,"shmsem_ow_r100_p256",0,100,60,256)
+
+rtp exec bench_rtp.vxe -- -s --transport shmsem --bind bench_shm --port 0 --mode oneway --rate 100 --dur 65 --payload 512 --tag shmsem_ow_srv_r100_p512
+C benchClientRun("shmsem","bench_shm",0,0,"shmsem_ow_r100_p512",0,100,60,512)
+
+rtp exec bench_rtp.vxe -- -s --transport shmsem --bind bench_shm --port 0 --mode oneway --rate 100 --dur 65 --payload 1024 --tag shmsem_ow_srv_r100_p1024
+C benchClientRun("shmsem","bench_shm",0,0,"shmsem_ow_r100_p1024",0,100,60,1024)
+
+rtp exec bench_rtp.vxe -- -s --transport shmsem --bind bench_shm --port 0 --mode oneway --rate 100 --dur 65 --payload 1500 --tag shmsem_ow_srv_r100_p1500
+C benchClientRun("shmsem","bench_shm",0,0,"shmsem_ow_r100_p1500",0,100,60,1500)
+```
+## shmsem (DKM ?? RX + RTP ????? TX)
+```
+C benchServerStart("shmsem","bench_shm",0,0,0,200,65,256)
+rtp exec bench_rtp.vxe -- -c --transport shmsem --dst bench_shm --port 0 --mode oneway --rate 200 --dur 60 --payload 256 --tag shmsem_ow_r200_p256
+
+C benchServerStart("shmsem","bench_shm",0,0,0,200,65,512)
+rtp exec bench_rtp.vxe -- -c --transport shmsem --dst bench_shm --port 0 --mode oneway --rate 200 --dur 60 --payload 512 --tag shmsem_ow_r200_p512
+
+C benchServerStart("shmsem","bench_shm",0,0,0,200,65,1024)
+rtp exec bench_rtp.vxe -- -c --transport shmsem --dst bench_shm --port 0 --mode oneway --rate 200 --dur 60 --payload 1024 --tag shmsem_ow_r200_p1024
+
+C benchServerStart("shmsem","bench_shm",0,0,0,200,65,1500)
+rtp exec bench_rtp.vxe -- -c --transport shmsem --dst bench_shm --port 0 --mode oneway --rate 200 --dur 60 --payload 1500 --tag shmsem_ow_r200_p1500
+
+C benchServerStart("shmsem","bench_shm",0,0,0,400,65,256)
+rtp exec bench_rtp.vxe -- -c --transport shmsem --dst bench_shm --port 0 --mode oneway --rate 400 --dur 60 --payload 256 --tag shmsem_ow_r400_p256
+
+C benchServerStart("shmsem","bench_shm",0,0,0,400,65,512)
+rtp exec bench_rtp.vxe -- -c --transport shmsem --dst bench_shm --port 0 --mode oneway --rate 400 --dur 60 --payload 512 --tag shmsem_ow_r400_p512
+
+C benchServerStart("shmsem","bench_shm",0,0,0,400,65,1024)
+rtp exec bench_rtp.vxe -- -c --transport shmsem --dst bench_shm --port 0 --mode oneway --rate 400 --dur 60 --payload 1024 --tag shmsem_ow_r400_p1024
+
+C benchServerStart("shmsem","bench_shm",0,0,0,400,65,1500)
+rtp exec bench_rtp.vxe -- -c --transport shmsem --dst bench_shm --port 0 --mode oneway --rate 400 --dur 60 --payload 1500 --tag shmsem_ow_r400_p1500
+
+C benchServerStart("shmsem","bench_shm",0,0,0,800,65,256)
+rtp exec bench_rtp.vxe -- -c --transport shmsem --dst bench_shm --port 0 --mode oneway --rate 800 --dur 60 --payload 256 --tag shmsem_ow_r800_p256
+
+C benchServerStart("shmsem","bench_shm",0,0,0,800,65,512)
+rtp exec bench_rtp.vxe -- -c --transport shmsem --dst bench_shm --port 0 --mode oneway --rate 800 --dur 60 --payload 512 --tag shmsem_ow_r800_p512
+
+C benchServerStart("shmsem","bench_shm",0,0,0,800,65,1024)
+rtp exec bench_rtp.vxe -- -c --transport shmsem --dst bench_shm --port 0 --mode oneway --rate 800 --dur 60 --payload 1024 --tag shmsem_ow_r800_p1024
+
+C benchServerStart("shmsem","bench_shm",0,0,0,800,65,1500)
+rtp exec bench_rtp.vxe -- -c --transport shmsem --dst bench_shm --port 0 --mode oneway --rate 800 --dur 60 --payload 1500 --tag shmsem_ow_r800_p1500
+
+C benchServerStart("shmsem","bench_shm",0,0,0,100,65,256)
+rtp exec bench_rtp.vxe -- -c --transport shmsem --dst bench_shm --port 0 --mode oneway --rate 100 --dur 60 --payload 256 --tag shmsem_ow_r100_p256
+
+C benchServerStart("shmsem","bench_shm",0,0,0,100,65,512)
+rtp exec bench_rtp.vxe -- -c --transport shmsem --dst bench_shm --port 0 --mode oneway --rate 100 --dur 60 --payload 512 --tag shmsem_ow_r100_p512
+
+C benchServerStart("shmsem","bench_shm",0,0,0,100,65,1024)
+rtp exec bench_rtp.vxe -- -c --transport shmsem --dst bench_shm --port 0 --mode oneway --rate 100 --dur 60 --payload 1024 --tag shmsem_ow_r100_p1024
+
+C benchServerStart("shmsem","bench_shm",0,0,0,100,65,1500)
+rtp exec bench_rtp.vxe -- -c --transport shmsem --dst bench_shm --port 0 --mode oneway --rate 100 --dur 60 --payload 1500 --tag shmsem_ow_r100_p1500
+```
