@@ -1,4 +1,5 @@
 #include "bench_transport.h"
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
@@ -18,6 +19,13 @@ typedef struct {
     struct sockaddr_in peer;
 } udp_impl_t;
 
+#ifdef _WRS_KERNEL
+#include <errnoLib.h>
+#define BENCH_ERRNO() errnoGet()
+#else
+#define BENCH_ERRNO() errno
+#endif
+
 static int set_timeout_ms(int sock, int to_ms)
 {
     if (to_ms <= 0) return 0;
@@ -27,12 +35,24 @@ static int set_timeout_ms(int sock, int to_ms)
     return setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv, sizeof(tv));
 }
 
+static void set_reuse_addr(int sock)
+{
+    int opt = 1;
+    (void)setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (const char*)&opt, sizeof(opt));
+#ifdef SO_REUSEPORT
+    (void)setsockopt(sock, SOL_SOCKET, SO_REUSEPORT, (const char*)&opt, sizeof(opt));
+#endif
+}
+
 static int open_(bench_transport_t* t, const bench_endpoint_cfg_t* cfg)
 {
     if (!t || !cfg) return -1;
     udp_impl_t* u = (udp_impl_t*)t->impl;
     u->sock = socket(AF_INET, SOCK_DGRAM, 0);
-    if (u->sock < 0) return -1;
+    if (u->sock < 0) {
+        printf("[BENCH][UDP] socket failed errno=%d\n", BENCH_ERRNO());
+        return -1;
+    }
 
     u->is_server = (cfg->role == BENCH_ROLE_SERVER);
     u->timeout_ms = cfg->timeout_ms;
@@ -50,13 +70,23 @@ static int open_(bench_transport_t* t, const bench_endpoint_cfg_t* cfg)
         const char* bind_ip = cfg->bind_or_dst ? cfg->bind_or_dst : "0.0.0.0";
         addr.sin_addr.s_addr = inet_addr(bind_ip);
         if (addr.sin_addr.s_addr == INADDR_NONE) addr.sin_addr.s_addr = htonl(INADDR_ANY);
-        if (bind(u->sock, (struct sockaddr*)&addr, sizeof(addr)) < 0) return -1;
+        set_reuse_addr(u->sock);
+        if (bind(u->sock, (struct sockaddr*)&addr, sizeof(addr)) < 0) {
+            printf("[BENCH][UDP] bind failed ip=%s port=%u errno=%d\n",
+                   bind_ip, (unsigned)cfg->port, BENCH_ERRNO());
+            return -1;
+        }
         return 0;
     }
 
     addr.sin_addr.s_addr = inet_addr(cfg->bind_or_dst ? cfg->bind_or_dst : "127.0.0.1");
     if (addr.sin_addr.s_addr == INADDR_NONE) return -1;
-    if (connect(u->sock, (struct sockaddr*)&addr, sizeof(addr)) < 0) return -1;
+    if (connect(u->sock, (struct sockaddr*)&addr, sizeof(addr)) < 0) {
+        printf("[BENCH][UDP] connect failed dst=%s port=%u errno=%d\n",
+               cfg->bind_or_dst ? cfg->bind_or_dst : "127.0.0.1",
+               (unsigned)cfg->port, BENCH_ERRNO());
+        return -1;
+    }
     u->peer = addr;
     u->peer_valid = 1;
     return 0;

@@ -42,3 +42,20 @@ uint64_t bench_now_ns(void)
 #endif
     return 0;
 }
+
+uint64_t bench_wall_ns(void)
+{
+    struct timespec ts;
+    if (clock_gettime(CLOCK_MONOTONIC, &ts) == 0) {
+        return (uint64_t)ts.tv_sec * 1000000000ull + (uint64_t)ts.tv_nsec;
+    }
+#ifdef _WRS_KERNEL
+    {
+        uint32_t ticks = tickGet();
+        uint32_t rate = (uint32_t)sysClkRateGet();
+        if (rate == 0) rate = 1000;
+        return (uint64_t)ticks * 1000000000ull / (uint64_t)rate;
+    }
+#endif
+    return 0;
+}

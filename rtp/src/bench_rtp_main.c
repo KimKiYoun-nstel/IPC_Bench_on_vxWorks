@@ -1,13 +1,18 @@
 #include "bench.h"
+#include "bench_csv.h"
+#include "bench_log.h"
+#include "bench_tag.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 static void usage(void)
 {
-    printf("bench_rtp usage:\n");
-    printf("  bench_rtp -s --transport udp --bind 0.0.0.0 --port 41000 --mode rr\n");
-    printf("  bench_rtp -c --transport udp --dst 127.0.0.1 --port 41000 --mode rr --rate 200 --dur 30 --payload 256 --tag udp_loop\n");
+    printf("bench_rtp.vxe usage:\n");
+    printf("  bench_rtp.vxe -s --transport udp --bind 0.0.0.0 --port 41000 --mode rr\n");
+    printf("  bench_rtp.vxe -c --transport udp --dst 127.0.0.1 --port 41000 --mode rr --rate 200 --dur 30 --payload 256 --tag udp_loop\n");
+    printf("  bench_rtp.vxe -c --transport udp --dst 127.0.0.1 --port 41000 --mode rr --rate 200 --dur 30 --payload 256 --csv /tffs0/IPC_Bench/bench_results.csv\n");
+    printf("  bench_rtp.vxe -c --transport udp --dst 127.0.0.1 --port 41000 --mode rr --rate 200 --dur 30 --payload 256 --log /tffs0/IPC_Bench/bench_auto.log\n");
 }
 
 int main(int argc, char** argv)
@@ -22,6 +27,8 @@ int main(int argc, char** argv)
     int dur = 30;
     int payload = 256;
     const char* tag = "rtp";
+    const char* csv_path = NULL;
+    const char* log_path = NULL;
 
     for (int i=1; i<argc; i++) {
         if (!strcmp(argv[i], "-s")) is_server = 1;
@@ -38,6 +45,8 @@ int main(int argc, char** argv)
         else if (!strcmp(argv[i], "--dur") && i+1<argc) dur = atoi(argv[++i]);
         else if (!strcmp(argv[i], "--payload") && i+1<argc) payload = atoi(argv[++i]);
         else if (!strcmp(argv[i], "--tag") && i+1<argc) tag = argv[++i];
+        else if (!strcmp(argv[i], "--csv") && i+1<argc) csv_path = argv[++i];
+        else if (!strcmp(argv[i], "--log") && i+1<argc) log_path = argv[++i];
         else { usage(); return 1; }
     }
 
@@ -59,6 +68,28 @@ int main(int argc, char** argv)
 
     bench_report_cfg_t rep = {0};
     rep.tag = tag;
+    rep.csv_path = csv_path;
+    if (!rep.csv_path && rep.tag) {
+        char csv_buf[256];
+        if (bench_tag_build_path(rep.tag, ".csv", csv_buf, sizeof(csv_buf)) == 0) {
+            rep.csv_path = csv_buf;
+        }
+    }
 
-    return is_server ? bench_run_server(&ep, &run) : bench_run_client(&ep, &run, &rep);
+    if (log_path) {
+        bench_log_set_path(log_path);
+    } else if (rep.tag) {
+        char log_buf[256];
+        if (bench_tag_build_path(rep.tag, ".log", log_buf, sizeof(log_buf)) == 0) {
+            bench_log_set_path(log_buf);
+        }
+    }
+
+    bench_result_t result = {0};
+    int rc = is_server ? bench_run_server_result(&ep, &run, &rep, &result)
+                       : bench_run_client_result(&ep, &run, &rep, &result);
+    if (rc == 0 && rep.csv_path) {
+        (void)bench_csv_append(rep.csv_path, &ep, &run, &rep, &result);
+    }
+    return rc;
 }

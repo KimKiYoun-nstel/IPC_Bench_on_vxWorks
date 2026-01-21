@@ -21,8 +21,25 @@ void bench_stats_init(bench_stats_t* s, uint64_t* buf, size_t cap);
 void bench_stats_add_sample(bench_stats_t* s, uint64_t ns);
 void bench_stats_finalize(bench_stats_t* s);
 
-typedef struct { uint64_t min_ns, p50_ns, p90_ns, p99_ns, max_ns; } bench_percentiles_t;
+typedef struct {
+    uint64_t min_ns;
+    uint64_t p50_ns;
+    uint64_t p90_ns;
+    uint64_t p99_ns;
+    uint64_t p999_ns;
+    uint64_t p9999_ns;
+    uint64_t max_ns;
+} bench_percentiles_t;
 bench_percentiles_t bench_stats_percentiles(const bench_stats_t* s);
+
+typedef struct {
+    uint64_t over_50us;
+    uint64_t over_100us;
+    uint64_t over_1ms;
+} bench_tail_counts_t;
+
+void bench_stats_tail_counts(const bench_stats_t* s, bench_tail_counts_t* out);
+size_t bench_stats_topk(const bench_stats_t* s, uint64_t* out, size_t k);
 
 #ifdef __cplusplus
 }
