@@ -19,7 +19,7 @@ LLVM_ROOT_POSIX := $(subst \,/,$(LLVM_ROOT))
 VX_TOOLCHAIN_BIN ?= $(WIND_BASE_POSIX)/host/x86-win64/bin
 WR_CC ?= $(if $(WIND_BASE),$(VX_TOOLCHAIN_BIN)/wr-cc,wr-cc)
 LLVM_AR_PATH := $(if $(LLVM_ROOT_POSIX),$(LLVM_ROOT_POSIX)/bin/llvm-ar,)
-WR_AR ?= $(if $(wildcard $(VX_TOOLCHAIN_BIN)/llvm-ar*),$(VX_TOOLCHAIN_BIN)/llvm-ar,$(if $(wildcard $(LLVM_AR_PATH)*),$(LLVM_AR_PATH),llvm-ar))
+WR_AR ?= $(if $(wildcard $(VX_TOOLCHAIN_BIN)/wr-ar*),$(VX_TOOLCHAIN_BIN)/wr-ar,$(if $(wildcard $(VX_TOOLCHAIN_BIN)/llvm-ar*),$(VX_TOOLCHAIN_BIN)/llvm-ar,$(if $(wildcard $(LLVM_AR_PATH)*),$(LLVM_AR_PATH),wr-ar)))
 
 # ---- Target/CPU ----
 VX_TARGET ?= powerpc-wrs-vxworks
